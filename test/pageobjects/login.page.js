@@ -5,18 +5,14 @@ class LoginPage extends BasePage {
     get inputPassword () { return $("//input[@type='password']");}
     get btnSubmit () { return $("//button[@type='submit']"); }
     
-    async defaultPassword() {
+    async getDefaultPassword() {
         let valuePasswordField = await $("//div[@class='orangehrm-login-error']/div/p[2]").getText();
-        let defaultPassword = [];
-        defaultPassword = valuePasswordField.split(' ');
-        return defaultPassword.pop();
+        return valuePasswordField.split(' ').pop(); //generate list and return the last
     }
 
-    async defaultUsername() {
+    async getDefaultUsername() {
         let valueUserNameField = await $("//div[@class='orangehrm-login-error']/div/p[1]").getText();
-        let defaultuserName = [];
-        defaultuserName = valueUserNameField.split(' ');
-        return defaultuserName.pop();
+        return valueUserNameField.split(' ').pop(); //generate list and return the last
     }
     
     async login (userNameLogin, passwordLogin) {

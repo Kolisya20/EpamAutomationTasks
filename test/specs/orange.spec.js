@@ -22,8 +22,11 @@ describe('Create, delete user', () => {
         //login
         await LoginPage.open();
         await expect(browser).toHaveUrlContaining('login');
-        await LoginPage.login(await LoginPage.defaultUsername(), await LoginPage.defaultPassword());
-                
+        await LoginPage.login(await LoginPage.getDefaultUsername(), await LoginPage.getDefaultPassword());
+
+        //select first employee from the data table for new userData
+        const employeeData = await ViewEmployeePage.getFirstEmployeeData();
+
         //set fake user data
         const userData = {
             userName: FakeData.userNameFake,
@@ -31,17 +34,15 @@ describe('Create, delete user', () => {
             userRole: UserRoleTypes.ESS,
             userStatus: UserStatusTypes.ENABLED,
 
-            //set wich employee will be used for create new user
-            employeeId: (await ViewEmployeePage.firstEmployeeData)[0],
-            employeeFullName: ((await ViewEmployeePage.firstEmployeeData)[1]).split(" ").shift() + " " + (await ViewEmployeePage.firstEmployeeData)[2] 
+            //set employee data for user
+            employeeId: employeeData.id,
+            employeeFirsLastName: employeeData.firstLastName
         }
         
         //go to add user page
-        await expect(SidePanelComponent.sidePanelCompoment).toBeDisplayed();
-        await browser.waitThenClick(SidePanelComponent.categorySidePanelLinkStrict('Admin'));
+        await SidePanelComponent.goToAdminUserManagmentUsersPage();
         await expect(browser).toHaveUrlContaining('viewSystemUsers');
-        await browser.waitThenClick(TopbarMenuComponent.topBarMenuLink('User Management'));
-        await browser.waitThenClick(TopbarMenuComponent.topbarSubMenuLink('Users'));
+        await TopbarMenuComponent.goToUserManagement_users();
         
         //add new user with fake data
         await browser.waitThenClick(SystemUsers.add_button);
@@ -53,7 +54,8 @@ describe('Create, delete user', () => {
         browser.waitUntil(() => Spinner.spinner.isDisplayed() == false);
 
         //check if user is displayed in the grid
-        expect(await TableComponent.tableRowsText()).toEqual(SaveSystemUser.createdUserData);
+        const findUserData = await TableComponent.tableRowsText();
+        expect(findUserData).toEqual(SaveSystemUser.createdUserData);
 
         //reset and check if its appear in the grid
         await browser.waitThenClick(SystemUsers.reset_button);
@@ -62,5 +64,6 @@ describe('Create, delete user', () => {
         //delete user, check if it removed
         await SystemUsers.deleteUser(userData.userName);  
         await SystemUsers.checkIsUserDeleted(userData.userName);
+        // await SystemUsers.checkIsUserDeleted('Jacqueline.White');
     });
 });
