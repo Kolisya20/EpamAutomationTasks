@@ -8,62 +8,45 @@ import SaveSystemUser from "../pageobjects/save-systems-users.page";
 import TableComponent from "../pageobjects/components/table.comp"
 import Spinner from "../pageobjects/components/spinner.comp"
 import ViewEmployeePage from "../pageobjects/view-employee.page";
-
-
+import UserData from "../utils/user.data"
 
 describe('Create, delete user', () => {
-    beforeEach(async() => {
+    before(async() => {
         await browser.maximizeWindow();
-    });
-    afterEach(async() => {
-        await browser.deleteSession();
-    });
-    it('should login, add new user and delete it', async() => {
         //login
         await LoginPage.open();
-        await expect(browser).toHaveUrlContaining('login');
-        await LoginPage.login(await LoginPage.getDefaultUsername(), await LoginPage.getDefaultPassword());
-
+        await LoginPage.login(await LoginPage.getDefaultUsername(), await LoginPage.getDefaultPassword());        
         //select first employee from the data table for new userData
         const employeeData = await ViewEmployeePage.getFirstEmployeeData();
-
         //set fake user data
-        const userData = {
-            userName: FakeData.userNameFake,
-            password: FakeData.passwordFake,
-            userRole: UserRoleTypes.ESS,
-            userStatus: UserStatusTypes.ENABLED,
+        UserData.setFakeData(FakeData.userNameFake, FakeData.passwordFake, UserRoleTypes.ESS, UserStatusTypes.ENABLED);
+        //set employee data for user
+        UserData.setEmployeeData(employeeData.id, employeeData.firstLastName);
+    });
 
-            //set employee data for user
-            employeeId: employeeData.id,
-            employeeFirsLastName: employeeData.firstLastName
-        }
-        
-        //go to add user page
+    it('should allows to create user', async() => {
         await SidePanelComponent.goToAdminUserManagmentUsersPage();
-        await expect(browser).toHaveUrlContaining('viewSystemUsers');
-        await TopbarMenuComponent.goToUserManagement_users();
-        
-        //add new user with fake data
+        await TopbarMenuComponent.goToUserManagement_users();        
         await browser.waitThenClick(SystemUsers.add_button);
-        await expect(browser).toHaveUrlContaining('saveSystemUser');
-        await SaveSystemUser.addNewUserAndSave(userData);
+        await SaveSystemUser.addNewUserAndSave(UserData);
+        expect(SaveSystemUser.success_popUp_elem).toExist;
+    });
 
-        //find added user
-        await SystemUsers.findUser(userData.userName);
-        browser.waitUntil(() => Spinner.spinner.isDisplayed() == false);
-
-        //check if user is displayed in the grid
+    it('should allows to search user by username', async() => {
+        await SystemUsers.findUser(UserData.name);
+        await Spinner.spinner.waitForExist({ timeout: 10000, reverse: true });
         const findUserData = await TableComponent.tableRowsText();
         expect(findUserData).toEqual(SaveSystemUser.createdUserData);
+    });
 
-        //reset and check if its appear in the grid
+    it('should allows to reset search results', async() => {
         await browser.waitThenClick(SystemUsers.reset_button);
-        await SystemUsers.checkDisplayedInTheGrid(userData.userName);
+        await Spinner.spinner.waitForExist({ timeout: 10000, reverse: true });
+        expect(await SystemUsers.userNameCelInGrid(UserData.name)).toExist();
+    });
 
-        //delete user, check if it removed
-        await SystemUsers.deleteUser(userData.userName);  
-        await SystemUsers.checkIsUserDeleted(userData.userName);
-        // await SystemUsers.checkIsUserDeleted('Jacqueline.White');
+    it('should allows to delete user', async() => {
+        await SystemUsers.deleteUser(UserData.name);  
+        expect(SystemUsers.success_popUp_elem).toExist;
     });
 });

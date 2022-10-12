@@ -6,10 +6,14 @@ class SaveSystemUser extends BasePage {
     get inputListBoxAutocomplete () { return $('//input[@placeholder="Type for hints..."]'); }
     get save_button() { return $('//button[@type="submit"]'); }
     get inputUserName () { return $("(//form[@class='oxd-form']/div/div/div/div/div/input)[1]") }
+    get verificationUserNameField () {return $ ("//form[@class='oxd-form']/div/div/div/div/div/input/../../span") }
     get inputPassword () { return $("(//form[@class='oxd-form']/div/div/div/div/div/input)[2]") }
     get inputConfirmPassword () { return $("(//form[@class='oxd-form']/div/div/div/div/div/input)[3]") }
-    get successSave_popUp() { return $('#oxd-toaster_1'); }
+    get success_popUp_elem() { return $('.oxd-toast--success')}
     get inputListBoxAutocompleteValue () { return $$('//div[@class="oxd-autocomplete-wrapper"]//div[@role="option"]'); }
+    get employeeNameSearchIndicator() { return $('//div[@class="oxd-autocomplete-option"][text()="Searching...."]') }
+    get employeeNameDropdownSearchIndicator() { return $('//div[@class="oxd-autocomplete-dropdown --positon-bottom"]') }
+    get usernameErrorMessage() { return $('.oxd-input-field-error-message') }
 
     selectRole_fromListRole_Status(role_status) { 
         return $(`//div[@class="oxd-select-wrapper"]/div[@role="listbox"]/div[@role="option"]/span[text()="${role_status}"]`)
@@ -19,21 +23,22 @@ class SaveSystemUser extends BasePage {
     
     async addNewUserAndSave(user) {
         await browser.waitThenClick(this.selectUserRole_selector);
-        await browser.waitThenClick(this.selectRole_fromListRole_Status(user.userRole));
+        await browser.waitThenClick(this.selectRole_fromListRole_Status(user.role));
         await browser.waitThenClick(this.selectStatus_selector);
-        await browser.waitThenClick(this.selectRole_fromListRole_Status(user.userStatus));
-        await browser.enterTextIntoTextField(this.inputListBoxAutocomplete, user.employeeId);
-        await browser.pause(5000);
+        await browser.waitThenClick(this.selectRole_fromListRole_Status(user.status));
+        
+        await browser.enterTextIntoTextField(this.inputListBoxAutocomplete, user.id);
+        await this.employeeNameDropdownSearchIndicator.waitForExist({ timeout: 10000 });
+        await this.employeeNameSearchIndicator.waitForExist({ timeout: 10000, reverse: true });
         await browser.waitThenClick(this.inputListBoxAutocompleteValue[0]);
-        await browser.enterTextIntoTextField(this.inputUserName, user.userName);
+        await browser.enterTextIntoTextField(this.inputUserName, user.name);
         await browser.enterTextIntoTextField(this.inputPassword, user.password);
         await browser.enterTextIntoTextField(this.inputConfirmPassword, user.password);
-        await browser.pause(2000);
+        await this.usernameErrorMessage.waitForExist({ timeout: 10000, reverse: true });
         await browser.waitThenClick(this.save_button);
-        await this.successSave_popUp.waitForDisplayed({ timeout: 10000 });
-        await expect(browser).toHaveUrlContaining('viewSystemUsers');
+        this.createdUserData.push(user.name, user.role, user.firsLastName, user.status)
+        await this.success_popUp_elem.waitForDisplayed({ timeout: 10000 });
         //collect user data that was created
-        this.createdUserData.push(user.userName, user.userRole, user.employeeFirsLastName, user.userStatus)
     }
 
     open() {

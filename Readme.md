@@ -9,7 +9,8 @@ Technologies used:
 
 ## Setup
 1. Clone this repository
-2. Install the dependencies of this project with `npm install`.
+2. Switch to the cloned repository
+3. Install the dependencies of this project with `npm install`.
 
 ## Running test suite
 1. Open terminal

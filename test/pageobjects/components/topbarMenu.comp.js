@@ -1,4 +1,5 @@
 class TopbarMenuComponent {
+    get userDropDown() { return $(".oxd-userdropdown") };
     get topbarMenu() { return $('[aria-label="Topbar Menu"]'); }
     get topBarMenuElements() { return $$('//span[@class="oxd-topbar-body-nav-tab-item"]') }
     get topBarSubMenuElements() { return $$('//a[@role="menuitem"]') }

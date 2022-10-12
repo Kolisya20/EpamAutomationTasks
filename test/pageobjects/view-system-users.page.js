@@ -5,7 +5,7 @@ class SystemUsers extends BasePage {
     get search_button() { return $('//button[@type="submit"]'); }
     get add_button() {return $('[type="button"][class="oxd-button oxd-button--medium oxd-button--secondary"]'); }
     get reset_button() { return $('[type="button"][class="oxd-button oxd-button--medium oxd-button--ghost"]'); }
-    get successDelete_popUp() { return $('#oxd-toaster_1'); }
+    get success_popUp_elem() { return $('.oxd-toast--success')}
     get delete_popUp() { return $('[role="document"]'); }
     get yes_button_OnDeletePopUp() { return $('//div[@role="document"]/*/button[@class="oxd-button oxd-button--medium oxd-button--label-danger orangehrm-button-margin"]'); }
     
@@ -18,24 +18,24 @@ class SystemUsers extends BasePage {
         await browser.waitThenClick(this.search_button);
     }
 
-    async checkDisplayedInTheGrid(userName) {
-        await expect(await this.userNameCelInGrid(userName)).toExist();
-    }
+    // async checkDisplayedInTheGrid(userName) {
+    //     await expect(await this.userNameCelInGrid(userName)).toExist();
+    // }
 
     async deleteUser(userName) {
         await browser.waitThenClick(await this.deleteButtonUserRow(userName));
         await (await this.delete_popUp).waitForDisplayed({ timeout: 10000 })
         await browser.waitThenClick(await this.yes_button_OnDeletePopUp);
-        await this.successDelete_popUp.waitForDisplayed({ timeout: 10000 });
+        await this.success_popUp_elem.waitForDisplayed({ timeout: 10000 });
     }
 
-    async checkIsUserDeleted(userName) {
-        const cellWithUserNameText = await this.userNameCelInGrid(userName);
-        await cellWithUserNameText.isExisting({
-            timeout: 5000,
-            reverse: true
-        })
-    }
+    // async checkIsUserDeleted(userName) {
+    //     const cellWithUserNameText = await this.userNameCelInGrid(userName);
+    //     await cellWithUserNameText.isExisting({
+    //         timeout: 5000,
+    //         reverse: true
+    //     })
+    // }
  
     open() {
         return super.open('web/index.php/admin/viewSystemUsers');

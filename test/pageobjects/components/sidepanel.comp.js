@@ -7,7 +7,6 @@ class SidePanelComponent {
         await (await this.sidePanelCompoment).isExisting();
         const sidePanelEls = await this.sidePanelElements; //get sidePanel Elements
         await browser.waitThenClick(sidePanelEls[0]); //click ti 1st element(Admin)
-        await expect(browser).toHaveUrlContaining('viewSystemUsers');
     }    
 }
 
